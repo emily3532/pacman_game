@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Settings.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Milestone</a> &gt; <a href="index.source.html" class="el_package">ghost</a> &gt; <span class="el_source">Settings.java</span></div><h1>Settings.java</h1><pre class="source lang-java linenums">package ghost;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import java.io.File;
+import java.util.Scanner;
+import java.lang.Long;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import processing.core.PImage;
+import processing.core.PApplet;
+
+public class Settings{
+  private String mapfile;
+  private long lives;
+  private long speed;
+  private JSONArray modeLengths;
+  private String[][] map;
+  private Cell[][] cellMap;
+  private int playerX;
+  private int playerY;
+  private int ambusherX;
+  private int ambusherY;
+  private int chaserX;
+  private int chaserY;
+  private int ignorantX;
+  private int ignorantY;
+  private int whimX;
+  private int whimY;
+  private boolean fright;
+  private long frightenedLength;
+
+<span class="fc" id="L39">  public Settings(PApplet app){</span>
+<span class="fc" id="L40">    this.mapfile = mapfile;</span>
+<span class="fc" id="L41">    this.lives = 0;</span>
+<span class="fc" id="L42">    this.speed = 0;</span>
+<span class="fc" id="L43">    this.modeLengths = null;</span>
+<span class="fc" id="L44">    this.map = new String[36][28];</span>
+<span class="fc" id="L45">    this.cellMap = new Cell[36][28];</span>
+<span class="fc" id="L46">    this.playerX = 0;</span>
+<span class="fc" id="L47">    this.playerY = 0;</span>
+<span class="fc" id="L48">    this.fright = false;</span>
+<span class="fc" id="L49">    this.frightenedLength = 0;</span>
+<span class="fc" id="L50">  }</span>
+
+  /**
+  * Reads a JSON configuration file named &quot;config.json&quot;.
+  * Extracts the map filename, lives, speed, length of frightened mode and length of other modes.
+  * @throws FileNotFoundException if config.json cannot be found.
+  * @throws ParseException if invalid JSON.
+  * @throws IOException if error in reading the file.
+  */
+  public void configReader(){
+<span class="fc" id="L60">    JSONParser jParse = new JSONParser();</span>
+    try {
+<span class="fc" id="L62">      FileReader fRead = new FileReader(&quot;config.json&quot;);</span>
+<span class="fc" id="L63">      Object obj = jParse.parse(fRead);</span>
+<span class="fc" id="L64">      JSONObject jObject = (JSONObject) obj;</span>
+<span class="fc" id="L65">      this.mapfile = (String) jObject.get(&quot;map&quot;);</span>
+<span class="fc" id="L66">      this.lives = (Long) jObject.get(&quot;lives&quot;);</span>
+<span class="fc" id="L67">      this.speed = (Long) jObject.get(&quot;speed&quot;);</span>
+<span class="fc" id="L68">      this.frightenedLength = (Long) jObject.get(&quot;frightenedLength&quot;);</span>
+<span class="fc" id="L69">      this.modeLengths = (JSONArray) jObject.get(&quot;modeLengths&quot;);</span>
+<span class="nc" id="L70">    } catch (FileNotFoundException e) {</span>
+<span class="nc" id="L71">      System.out.println(&quot;File not found&quot;);</span>
+<span class="nc" id="L72">    } catch (IOException e) {</span>
+<span class="nc" id="L73">      System.out.println(e);</span>
+<span class="nc" id="L74">    } catch(ParseException e) {</span>
+<span class="nc" id="L75">      System.out.println(e);</span>
+<span class="pc" id="L76">    } return;</span>
+  }
+
+  /**
+  * Returns the modelengths from config.json as a JSONArray of ints.
+  * @return modeLengths
+  */
+  public JSONArray getModes(){
+<span class="fc" id="L84">    return this.modeLengths;</span>
+  }
+  /**
+  * Returns the modelengths from config.json as a JSONArray of ints.
+  * @return modeLengths
+  */
+  public String getMapFile(){
+<span class="fc" id="L91">    return this.mapfile;</span>
+  }
+  /**
+  * Reads the map file provided from config.json and creates an array of an array of Strings.
+  * @throws FileNotFoundException if map file cannot be found.
+  * @throws IOException if error when reading the file.
+  */
+  public void mapReader(){
+    try {
+<span class="fc" id="L100">      File fMap = new File(this.mapfile);</span>
+<span class="fc" id="L101">      Scanner sMap = new Scanner(fMap);</span>
+<span class="fc" id="L102">      int k = 0;</span>
+
+<span class="fc bfc" id="L104" title="All 2 branches covered.">      while (sMap.hasNextLine()) {</span>
+<span class="fc" id="L105">        String ln = sMap.nextLine();</span>
+
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (int i = 0; i&lt; ln.length(); i++) {</span>
+<span class="fc" id="L108">          this.map[k][i] = String.valueOf(ln.charAt(i));</span>
+        }
+<span class="fc" id="L110">        k+=1;</span>
+<span class="fc" id="L111">      }</span>
+<span class="fc" id="L112">      return;</span>
+    }
+<span class="nc" id="L114">    catch(FileNotFoundException e){</span>
+<span class="nc" id="L115">      System.out.println(&quot;File not found&quot;);</span>
+    }
+<span class="nc" id="L117">    catch(IOException e){</span>
+<span class="nc" id="L118">      System.out.println(&quot;Error reading map&quot;);</span>
+<span class="nc" id="L119">    }</span>
+<span class="nc" id="L120">    return;</span>
+  }
+  /**
+  * returns a String[][] of the map.
+  * @return map
+  */
+  public String[][] getMap(){
+<span class="fc" id="L127">    configReader();</span>
+<span class="fc" id="L128">    mapReader();</span>
+<span class="fc" id="L129">    return this.map;</span>
+  }
+  /**
+  * Creates an array of objects from cells.
+  * Identifies the X and Y coordinates of Ghost(s) and Player.
+  * @param app, PApplet
+  */
+  public void mapCell(PApplet app){
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">    for(int y = 0; y &lt; this.map.length; y++){</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">      for(int x = 0; x &lt; this.map[y].length; x++){</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        if(this.map[y][x].equals(&quot;0&quot;)){</span>
+        }
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        else if (this.map[y][x].equals(&quot;1&quot;)){</span>
+<span class="fc" id="L142">          this.cellMap[y][x] = new Map(app.loadImage(&quot;src/main/resources/horizontal.png&quot;), 16*x, 16*y);</span>
+        }
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        else if (this.map[y][x].equals(&quot;2&quot;)){</span>
+<span class="nc" id="L145">          this.cellMap[y][x] = new Map(app.loadImage(&quot;src/main/resources/vertical.png&quot;), 16*x, 16*y);</span>
+        }
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        else if (this.map[y][x].equals(&quot;3&quot;)){</span>
+<span class="nc" id="L148">          this.cellMap[y][x] = new Map(app.loadImage(&quot;src/main/resources/upLeft.png&quot;), 16*x, 16*y);</span>
+        }
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">        else if (this.map[y][x].equals(&quot;4&quot;)){</span>
+<span class="nc" id="L151">          this.cellMap[y][x] = new Map(app.loadImage(&quot;src/main/resources/upRight.png&quot;), 16*x, 16*y);</span>
+        }
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        else if (this.map[y][x].equals(&quot;5&quot;)){</span>
+<span class="fc" id="L154">          this.cellMap[y][x] = new Map(app.loadImage(&quot;src/main/resources/downLeft.png&quot;), 16*x, 16*y);</span>
+        }
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">        else if (this.map[y][x].equals(&quot;6&quot;)){</span>
+<span class="fc" id="L157">          this.cellMap[y][x] = new Map(app.loadImage(&quot;src/main/resources/downRight.png&quot;), 16*x, 16*y);</span>
+        }
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        else if (this.map[y][x].equals(&quot;7&quot;)){</span>
+<span class="nc" id="L160">          this.cellMap[y][x] = new Fruit(app.loadImage(&quot;src/main/resources/fruit.png&quot;), 16*x, 16*y);</span>
+        }
+<span class="nc bnc" id="L162" title="All 2 branches missed.">        else if (this.map[y][x].equals(&quot;8&quot;)){</span>
+<span class="nc" id="L163">          this.cellMap[y][x] = new SuperFruit(app.loadImage(&quot;src/main/resources/fruit.png&quot;), 16*x -10, 16*y -8);</span>
+        }
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        else if (this.map[y][x].equals(&quot;a&quot;)){</span>
+<span class="nc" id="L166">          this.ambusherX = x;</span>
+<span class="nc" id="L167">          this.ambusherY = y;</span>
+        }
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        else if (this.map[y][x].equals(&quot;c&quot;)){</span>
+<span class="nc" id="L170">          this.chaserX = x;</span>
+<span class="nc" id="L171">          this.chaserY = y;</span>
+        }
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        else if (this.map[y][x].equals(&quot;i&quot;)){</span>
+<span class="nc" id="L174">          this.ignorantX = x;</span>
+<span class="nc" id="L175">          this.ignorantY = y;</span>
+        }
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        else if (this.map[y][x].equals(&quot;w&quot;)){</span>
+<span class="nc" id="L178">          this.whimX = x;</span>
+<span class="nc" id="L179">          this.whimY = y;</span>
+        }
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        else if(this.map[y][x].equals(&quot;p&quot;)){</span>
+<span class="nc" id="L182">          this.playerX = x;</span>
+<span class="nc" id="L183">          this.playerY = y;</span>
+        }
+
+      }
+    }
+<span class="nc" id="L188">  }</span>
+
+  public Cell[][] getCellMap(){
+<span class="nc" id="L191">    return this.cellMap;</span>
+  }
+
+  public void draw(PApplet app){
+<span class="nc bnc" id="L195" title="All 2 branches missed.">    for(Cell[] a : this.cellMap){</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">      for(Cell cell : a){</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">        if(cell == null){</span>
+        } else{
+<span class="nc" id="L199">            app.image(cell.getSprite(), cell.getX(), cell.getY());</span>
+        }
+      }
+    }
+<span class="nc bnc" id="L203" title="All 2 branches missed.">    for(int l = 0; l &lt; this.lives;l++){</span>
+<span class="nc" id="L204">      Cell live = new Cell(app.loadImage(&quot;src/main/resources/playerRight.png&quot;), 16*(l)+(l*16)+4, 16*34);</span>
+<span class="nc" id="L205">      app.image(live.getSprite(), live.getX(), live.getY());</span>
+    }
+
+<span class="nc" id="L208">  }</span>
+
+  public int getPlayerX(){
+<span class="nc" id="L211">    return this.playerX;</span>
+  }
+
+  public int getPlayerY(){
+<span class="nc" id="L215">    return this.playerY;</span>
+  }
+  public int getaX(){
+<span class="nc" id="L218">    return this.ambusherX;</span>
+  }
+  public int getaY(){
+<span class="nc" id="L221">    return this.ambusherY;</span>
+  }
+  public int getcX(){
+<span class="nc" id="L224">    return this.chaserX;</span>
+  }
+  public int getcY(){
+<span class="nc" id="L227">    return this.chaserY;</span>
+  }
+  public int getiX(){
+<span class="nc" id="L230">    return this.ignorantX;</span>
+  }
+  public int getiY(){
+<span class="nc" id="L233">    return this.ignorantY;</span>
+  }
+  public int getwX(){
+<span class="nc" id="L236">    return this.whimX;</span>
+  }
+  public int getwY(){
+<span class="nc" id="L239">    return this.whimY;</span>
+  }
+
+  public int getSpeed(){
+<span class="fc" id="L243">    return (int) this.speed;</span>
+  }
+
+  public Long getLives(){
+<span class="fc" id="L247">    return this.lives;</span>
+  }
+
+  public Long getFrightLen(){
+<span class="fc" id="L251">    return this.frightenedLength;</span>
+  }
+
+  public int stepCell(int xv, int yv, String direction){
+<span class="nc" id="L255">    int fruitCount = 0;</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">    for(int y = 0; y &lt; this.map.length; y++){</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">      for(int x = 0; x &lt; this.map[y].length; x++){</span>
+<span class="nc bnc" id="L258" title="All 4 branches missed.">        if(this.cellMap[y][x]!= null &amp;&amp; this.cellMap[y][x].getClass() == Fruit.class){</span>
+<span class="nc" id="L259">          fruitCount+=1;</span>
+        }
+<span class="nc bnc" id="L261" title="All 4 branches missed.">        else if(this.cellMap[y][x]!= null &amp;&amp; this.cellMap[y][x].getClass() == SuperFruit.class){</span>
+<span class="nc" id="L262">          fruitCount+=1;</span>
+        }
+      }
+    }
+
+<span class="nc bnc" id="L267" title="All 2 branches missed.">    if(direction.equals(&quot;u&quot;)){</span>
+<span class="nc" id="L268">      yv+=8;</span>
+<span class="nc" id="L269">      xv+=6;</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">      if(this.cellMap[(yv)/16][(xv)/16] != null){</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">        if(this.cellMap[(yv)/16][(xv)/16].getClass() == Fruit.class){</span>
+<span class="nc" id="L272">          this.cellMap[(yv)/16][(xv)/16] = null;</span>
+        }
+<span class="nc bnc" id="L274" title="All 4 branches missed.">        else if(this.cellMap[(yv)/16][(xv)/16]!= null &amp;&amp; this.cellMap[(yv)/16][(xv)/16].getClass() == SuperFruit.class){</span>
+<span class="nc" id="L275">          fruitCount+=1;</span>
+<span class="nc" id="L276">          this.fright = true;</span>
+<span class="nc" id="L277">          this.cellMap[(yv)/16][(xv)/16] = null;</span>
+
+        }
+      }
+    }
+<span class="nc bnc" id="L282" title="All 2 branches missed.">    else if(direction.equals(&quot;d&quot;)){</span>
+<span class="nc" id="L283">      yv+=8;</span>
+<span class="nc" id="L284">      xv+=6;</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">      if(this.cellMap[(yv)/16][(xv)/16] != null){</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        if(this.cellMap[(yv)/16][(xv)/16].getClass() == Fruit.class){</span>
+<span class="nc" id="L287">          this.cellMap[(yv)/16][(xv)/16] = null;</span>
+        }
+<span class="nc bnc" id="L289" title="All 4 branches missed.">        else if(this.cellMap[(yv)/16][(xv)/16]!= null &amp;&amp; this.cellMap[(yv)/16][(xv)/16].getClass() == SuperFruit.class){</span>
+<span class="nc" id="L290">          fruitCount+=1;</span>
+<span class="nc" id="L291">          this.fright = true;</span>
+<span class="nc" id="L292">          this.cellMap[(yv)/16][(xv)/16] = null;</span>
+        }
+      }
+    }
+<span class="nc bnc" id="L296" title="All 2 branches missed.">    else if(direction.equals(&quot;l&quot;)){</span>
+<span class="nc" id="L297">      yv+=6;</span>
+<span class="nc" id="L298">      xv+=8;</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">      if(this.cellMap[(yv)/16][(xv)/16] != null){</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">        if(this.cellMap[(yv)/16][(xv)/16].getClass() == Fruit.class){</span>
+<span class="nc" id="L301">          this.cellMap[(yv)/16][(xv)/16] = null;</span>
+        }
+<span class="nc bnc" id="L303" title="All 4 branches missed.">        else if(this.cellMap[(yv)/16][(xv)/16]!= null &amp;&amp; this.cellMap[(yv)/16][(xv)/16].getClass() == SuperFruit.class){</span>
+<span class="nc" id="L304">          fruitCount+=1;</span>
+<span class="nc" id="L305">          this.fright = true;</span>
+<span class="nc" id="L306">          this.cellMap[(yv)/16][(xv)/16] = null;</span>
+
+        }
+      }
+    }
+<span class="nc bnc" id="L311" title="All 2 branches missed.">    else if(direction.equals(&quot;r&quot;)){</span>
+<span class="nc" id="L312">      yv+=6;</span>
+<span class="nc" id="L313">      xv+=8;</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">      if(this.cellMap[(yv)/16][(xv)/16] != null){</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">        if(this.cellMap[(yv)/16][(xv)/16].getClass() == Fruit.class){</span>
+<span class="nc" id="L316">          this.cellMap[(yv)/16][(xv)/16] = null;</span>
+        }
+<span class="nc bnc" id="L318" title="All 4 branches missed.">        else if(this.cellMap[(yv)/16][(xv)/16]!= null &amp;&amp; this.cellMap[(yv)/16][(xv)/16].getClass() == SuperFruit.class){</span>
+<span class="nc" id="L319">          fruitCount+=1;</span>
+<span class="nc" id="L320">          this.fright = true;</span>
+<span class="nc" id="L321">          this.cellMap[(yv)/16][(xv)/16] = null;</span>
+
+        }
+      }
+    }
+
+<span class="nc" id="L327">    return fruitCount;</span>
+}
+
+  public boolean nextCell(int xval, int yval, String direction){
+<span class="fc bfc" id="L331" title="All 2 branches covered.">    if(direction.equals(&quot;u&quot;)){</span>
+      //yval-=16;
+<span class="pc bpc" id="L333" title="1 of 2 branches missed.">      if(this.cellMap[(yval+4)/16][(xval+4)/16] != null){</span>
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        if(this.cellMap[(yval+4)/16][(xval+4)/16].getClass() == Map.class){</span>
+<span class="nc" id="L335">          int boxLeft = this.cellMap[(yval+4)/16][(xval+4)/16].getX();</span>
+<span class="nc" id="L336">          int boxRight = this.cellMap[(yval+4)/16][(xval+4)/16].getX() +16;</span>
+<span class="nc" id="L337">          int boxTop = this.cellMap[(yval+4)/16][(xval+4)/16].getY();</span>
+<span class="nc" id="L338">          int boxBottom = this.cellMap[(yval+4)/16][(xval+4)/16].getY()+16;</span>
+
+<span class="nc" id="L340">          int playerLeft = xval+4;</span>
+<span class="nc" id="L341">          int playerTop = yval-4;</span>
+<span class="nc" id="L342">          int playerRight = xval + 4+16;</span>
+<span class="nc" id="L343">          int playerBottom = yval-4+16;</span>
+<span class="nc bnc" id="L344" title="All 6 branches missed.">          if(playerLeft &lt; boxRight &amp;&amp; playerBottom &gt; boxTop &amp;&amp; playerTop&lt; boxBottom){</span>
+<span class="nc" id="L345">            return true;</span>
+          }
+<span class="nc" id="L347">        }</span>
+      }
+    }
+<span class="fc bfc" id="L350" title="All 2 branches covered.">    else if(direction.equals(&quot;d&quot;)){</span>
+      //yval-=16;
+<span class="pc bpc" id="L352" title="1 of 2 branches missed.">      if(this.cellMap[(yval+12)/16][(xval+4)/16] != null){</span>
+        //System.out.println(this.cellMap[(yval+12)/16][(xval+4)/16].getClass());
+<span class="nc bnc" id="L354" title="All 2 branches missed.">        if(this.cellMap[(yval+12)/16][(xval+4)/16].getClass() == Map.class){</span>
+<span class="nc" id="L355">          int boxLeft = this.cellMap[(yval+12)/16][(xval+4)/16].getX();</span>
+<span class="nc" id="L356">          int boxRight = this.cellMap[(yval+12)/16][(xval+4)/16].getX() +16;</span>
+<span class="nc" id="L357">          int boxTop = this.cellMap[(yval+12)/16][(xval+4)/16].getY();</span>
+<span class="nc" id="L358">          int boxBottom = this.cellMap[(yval+12)/16][(xval+4)/16].getY()+16;</span>
+
+<span class="nc" id="L360">          int playerLeft = xval+4;</span>
+<span class="nc" id="L361">          int playerTop = yval+12;</span>
+<span class="nc" id="L362">          int playerRight = xval + 4+16;</span>
+<span class="nc" id="L363">          int playerBottom = yval+12+16;</span>
+<span class="nc bnc" id="L364" title="All 6 branches missed.">          if(playerLeft &lt; boxRight &amp;&amp; playerBottom &gt; boxTop &amp;&amp; playerTop&lt; boxBottom){</span>
+<span class="nc" id="L365">            return true;</span>
+          }
+<span class="nc" id="L367">        }</span>
+      }
+    }
+<span class="fc bfc" id="L370" title="All 2 branches covered.">    else if(direction.equals(&quot;l&quot;)){</span>
+      //yval-=16;
+<span class="pc bpc" id="L372" title="1 of 2 branches missed.">      if(this.cellMap[(yval+4)/16][(xval+4)/16] != null){</span>
+<span class="nc bnc" id="L373" title="All 2 branches missed.">        if(this.cellMap[(yval+4)/16][(xval+4)/16].getClass() == Map.class){</span>
+<span class="nc" id="L374">          int boxLeft = this.cellMap[(yval+4)/16][(xval+4)/16].getX();</span>
+<span class="nc" id="L375">          int boxRight = this.cellMap[(yval+4)/16][(xval+4)/16].getX() +16;</span>
+<span class="nc" id="L376">          int boxTop = this.cellMap[(yval+4)/16][(xval+4)/16].getY();</span>
+<span class="nc" id="L377">          int boxBottom = this.cellMap[(yval+4)/16][(xval+4)/16].getY()+16;</span>
+
+<span class="nc" id="L379">          int playerLeft = xval-10;</span>
+<span class="nc" id="L380">          int playerTop = yval+4;</span>
+<span class="nc" id="L381">          int playerRight = xval -10+16;</span>
+<span class="nc" id="L382">          int playerBottom = yval+4+16;</span>
+<span class="nc bnc" id="L383" title="All 6 branches missed.">          if(playerLeft &lt; boxRight &amp;&amp; playerBottom &gt; boxTop &amp;&amp; playerTop&lt; boxBottom){</span>
+<span class="nc" id="L384">            return true;</span>
+          }
+<span class="nc" id="L386">        }</span>
+      }
+    }
+<span class="pc bpc" id="L389" title="1 of 2 branches missed.">    else if(direction.equals(&quot;r&quot;)){</span>
+      //yval-=16;
+<span class="pc bpc" id="L391" title="1 of 2 branches missed.">      if(this.cellMap[(yval+4)/16][(xval+10)/16] != null){</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">        if(this.cellMap[(yval+4)/16][(xval+10)/16].getClass() == Map.class){</span>
+<span class="nc" id="L393">          int boxLeft = this.cellMap[(yval+4)/16][(xval+10)/16].getX();</span>
+<span class="nc" id="L394">          int boxRight = this.cellMap[(yval+4)/16][(xval+10)/16].getX() +16;</span>
+<span class="nc" id="L395">          int boxTop = this.cellMap[(yval+4)/16][(xval+10)/16].getY();</span>
+<span class="nc" id="L396">          int boxBottom = this.cellMap[(yval+4)/16][(xval+10)/16].getY()+16;</span>
+
+<span class="nc" id="L398">          int playerLeft = xval+14;</span>
+<span class="nc" id="L399">          int playerTop = yval+4;</span>
+<span class="nc" id="L400">          int playerRight = xval+14+16;</span>
+<span class="nc" id="L401">          int playerBottom = yval+4+16;</span>
+<span class="nc bnc" id="L402" title="All 6 branches missed.">          if(playerLeft &lt; boxRight &amp;&amp; playerBottom &gt; boxTop &amp;&amp; playerTop&lt; boxBottom){</span>
+<span class="nc" id="L403">            return true;</span>
+          }
+        }
+      }
+    }
+<span class="fc" id="L408">    return false;</span>
+  }
+
+  public boolean removeLife(){
+<span class="nc" id="L412">    this.lives-=1;</span>
+
+<span class="nc bnc" id="L414" title="All 2 branches missed.">    if(this.lives  == 0 ){</span>
+<span class="nc" id="L415">      return true;</span>
+    }
+<span class="nc" id="L417">    return false;</span>
+  }
+
+  public boolean getFright(){
+<span class="nc" id="L421">    return this.fright;</span>
+  }
+
+  public void setFright(){
+<span class="nc" id="L425">    this.fright = false;</span>
+<span class="nc" id="L426">  }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

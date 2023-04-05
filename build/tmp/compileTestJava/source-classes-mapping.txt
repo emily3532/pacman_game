@@ -1,0 +1,10 @@
+ghost/CellTest.java
+ ghost.CellTest
+ghost/SettingsTest.java
+ ghost.SettingsTest
+ghost/WakaTest.java
+ ghost.WakaTest
+ghost/AppTest.java
+ ghost.AppTest
+ghost/GhostTest.java
+ ghost.GhostTest
